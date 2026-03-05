@@ -3,116 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQIHA ALAM | My Magic Cloud 🌌✨</title>
+    <title>FAQIHA ALAM | Magic Gallery 🌌✨</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <!-- WhatsApp Icon k liye FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
-        :root { --accent: #ffb7c5; }
-        body { font-family: 'Quicksand', sans-serif; margin: 0; color: white; background: url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed; background-size: cover; min-height: 100vh; }
+        :root { --accent: #ffb7c5; --wa-green: #25d366; }
+        
+        body, #lockScreen { 
+            background: url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed; 
+            background-size: cover; margin: 0; color: white; font-family: 'Quicksand', sans-serif; min-height: 100vh;
+        }
+
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 13, 21, 0.85); z-index: -1; }
-        .page { display: none; padding: 20px; animation: softFade 0.8s ease; }
-        .active { display: block; }
-        @keyframes softFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .auth-container { text-align: center; margin-top: 15vh; }
-        .cute-glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid var(--accent); display: inline-block; width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .cute-glass-box h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--accent); margin: 0; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; text-align: center; outline: none; }
-        .cute-btn { background: var(--accent); color: #222; border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 16px; transition: 0.3s; }
+        
+        /* --- Password Lock UI --- */
+        #lockScreen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        #lockScreen::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
+        .lock-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid var(--accent); text-align: center; width: 300px; }
+        .lock-box h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--accent); margin-bottom: 20px; }
+        input#passInput { width: 100%; padding: 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; text-align: center; outline: none; margin-bottom: 15px; box-sizing: border-box; }
+        .cute-btn { background: var(--accent); color: #222; border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        /* --- Gallery Grid --- */
+        #mainContent { display: none; padding: 20px; animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         header { text-align: center; margin: 40px 0; }
-        h1 { font-family: 'Dancing Script', cursive; font-size: 4rem; margin: 0; color: var(--accent); }
-        .quote-box { background: rgba(0,0,0,0.4); display: inline-block; padding: 8px 25px; border-radius: 50px; border: 1px solid var(--accent); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto; }
-        .card { background: rgba(255,255,255,0.05); border-radius: 30px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .media-box { width: 100%; height: 380px; }
-        img, video { width: 100%; height: 100%; object-fit: cover; }
-        .dl-btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        h1 { font-family: 'Dancing Script', cursive; font-size: 4rem; color: var(--accent); margin: 0; }
+        .quote-box { background: rgba(0,0,0,0.4); display: inline-block; padding: 8px 25px; border-radius: 50px; border: 1px solid var(--accent); margin-bottom: 30px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
+        .thumb-card { background: rgba(255,255,255,0.1); border-radius: 15px; overflow: hidden; aspect-ratio: 1/1; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; position: relative; }
+        .thumb-card:hover { transform: scale(1.05); border-color: var(--accent); }
+        .thumb-card img, .thumb-card video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- WhatsApp Floating Button --- */
+        .wa-float {
+            position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
+            background-color: var(--wa-green); color: #FFF; border-radius: 50px;
+            text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            z-index: 3000; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: 0.3s;
+        }
+        .wa-float:hover { transform: scale(1.1); background-color: #1ebe57; }
+
+        /* --- Full View Modal --- */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        #modalMedia { max-width: 100%; max-height: 80vh; display: flex; justify-content: center; }
+        #modalMedia img, #modalMedia video { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 0 20px rgba(255,183,197,0.3); }
+        .close-modal { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
+        .dl-link { position: absolute; bottom: 80px; background: var(--accent); color: black; padding: 12px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="overlay"></div>
 
-<!-- Login/Signup Section -->
-<div id="authPage" class="page active auth-container">
-    <div class="cute-glass-box">
-        <h2 id="authTitle">Faqiha Alam</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="handleAuth()" id="authBtn" class="cute-btn">Enter Magic Cloud 🌸</button>
-        <p onclick="toggleAuth()" id="toggleTxt" style="cursor:pointer; margin-top:20px; color:var(--accent); font-size:12px;">Create Account 🎀</p>
+<!-- WhatsApp Circle Button -->
+<a href="https://wa.me/message/45354LQZI6J3I1" class="wa-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<div id="lockScreen">
+    <div class="lock-box">
+        <h2>Faqiha Alam</h2>
+        <input type="password" id="passInput" placeholder="Password">
+        <button onclick="unlock()" class="cute-btn">Unlock Magic 🌸</button>
     </div>
 </div>
 
-<!-- Gallery Section -->
-<div id="userPage" class="page">
+<div id="mainContent">
     <header>
         <h1>Faqiha Alam</h1>
         <div class="quote-box"><div id="matrixText"></div></div>
     </header>
-    <div style="text-align:center; margin-bottom:20px;">
-        <button onclick="auth.signOut(); location.reload();" class="cute-btn" style="width:auto; padding:10px 30px;">Logout</button>
-    </div>
     <div class="grid" id="userGrid"></div>
+    <footer style="text-align:center; padding:40px; color:var(--accent); font-weight:bold; letter-spacing: 2px;">POWERED BY IBN E RAUF 👑</footer>
+</div>
+
+<div id="modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <div id="modalMedia"></div>
+    <a id="downloadLink" class="dl-link" href="#" target="_blank">Download Full Size</a>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0",
-  authDomain: "fiza-queen.firebaseapp.com",
-  projectId: "fiza-queen",
-  storageBucket: "fiza-queen.firebasestorage.app",
-  appId: "1:534162659941:web:e9f008625f161344f1c48c"
-};
-
+const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen" };
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.firestore();
 
-let isLoginMode = true;
-function toggleAuth() {
-    isLoginMode = !isLoginMode;
-    document.getElementById('authTitle').innerText = isLoginMode ? "Faqiha Alam" : "Join Cloud";
-    document.getElementById('authBtn').innerText = isLoginMode ? "Enter Magic Cloud 🌸" : "Sign Up 🎀";
-}
-
-function handleAuth() {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('pass').value;
-    if(!email || !pass) return alert("Please fill fields! ✨");
-
-    if(isLoginMode) {
-        auth.signInWithEmailAndPassword(email, pass)
-            .then(res => checkApproval(res.user.uid))
-            .catch(e => alert(e.message));
-    } else {
-        auth.createUserWithEmailAndPassword(email, pass).then(res => {
-            db.collection("users").doc(res.user.uid).set({ 
-                email: email, 
-                isApproved: false, 
-                role: 'user',
-                requestTime: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("Request Sent! 🌸 Please ask Faqiha to approve you.");
-                auth.signOut();
-                location.reload();
-            });
-        }).catch(e => alert(e.message));
-    }
-}
-
-function checkApproval(uid) {
-    db.collection("users").doc(uid).get().then(doc => {
-        const data = doc.data();
-        if(data && (data.isApproved || data.role === 'admin')) {
-            document.getElementById('authPage').classList.remove('active');
-            document.getElementById('userPage').classList.add('active');
-            loadGallery(); startTyping();
-        } else { 
-            alert("Access Pending! ⏳ Wait for Faqiha's approval."); 
-            auth.signOut(); 
-        }
-    });
+function unlock() {
+    if(document.getElementById('passInput').value === 'VORTEXLOVEFAQI') {
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        loadGallery(); startTyping();
+    } else { alert("Wrong Password! ❌"); }
 }
 
 function loadGallery() {
@@ -121,17 +108,30 @@ function loadGallery() {
         grid.innerHTML = '';
         snap.forEach(doc => {
             const item = doc.data();
-            grid.innerHTML += `<div class="card">
-                <div class="media-box">${item.type.includes('image') ? `<img src="${item.url}">` : `<video src="${item.url}" controls></video>`}</div>
-                <button class="dl-btn" onclick="window.open('${item.url}', '_blank')">Download</button>
-            </div>`;
+            const isVideo = item.type.includes('video');
+            grid.innerHTML += `
+                <div class="thumb-card" onclick="openModal('${item.url}', '${item.type}')">
+                    ${isVideo ? `<video src="${item.url}#t=0.5"></video><i class="fas fa-play" style="position:absolute; top:40%; left:42%; opacity:0.7;"></i>` : `<img src="${item.url}" loading="lazy">`}
+                </div>`;
         });
     });
 }
 
+function openModal(url, type) {
+    const modal = document.getElementById('modal');
+    const container = document.getElementById('modalMedia');
+    const dl = document.getElementById('downloadLink');
+    container.innerHTML = type.includes('video') ? `<video src="${url}" controls autoplay></video>` : `<img src="${url}">`;
+    dl.href = url;
+    modal.style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('modalMedia').innerHTML = ''; }
+
 function startTyping() {
     const text = "خوبصورت ہیں وہ دل جو وفا پہ قائم رہتے ہیں 🌸✨";
     let i = 0; const target = document.getElementById('matrixText');
+    target.innerHTML = "";
     function type() { if(i < text.length) { target.innerHTML += text.charAt(i); i++; setTimeout(type, 120); } }
     type();
 }
