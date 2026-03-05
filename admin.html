@@ -3,74 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Faqiha Alam 👑</title>
+    <title>Master Admin | Faqiha Alam 👑</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Quicksand', sans-serif; background: #0d0d15; color: white; padding: 40px; text-align: center; }
-        .admin-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 20px; border: 1px solid #ffb7c5; max-width: 500px; margin: 20px auto; }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
-        button { background: #ffb7c5; font-weight: bold; cursor: pointer; }
-        .user-row { display: flex; justify-content: space-between; background: rgba(255,255,255,0.1); padding: 10px; margin-top: 5px; border-radius: 8px; }
+        body { font-family: 'Quicksand', sans-serif; background: #0a0a0f; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid #ffb7c5; margin-bottom: 20px; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; box-sizing: border-box; }
+        button { background: #ffb7c5; color: #111; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #ffa0b0; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 12px; margin-top: 8px; border-radius: 10px; border-left: 4px solid #ffb7c5; }
+        .approve-btn { width: auto; padding: 6px 15px; margin: 0; background: #2ecc71; color: white; }
     </style>
 </head>
 <body>
-    <h1>Master Control 👑</h1>
+    <div class="container">
+        <h1 style="color:#ffb7c5; font-size: 2.5rem;">Faqiha's Control 👑</h1>
+        
+        <!-- Upload Box -->
+        <div class="card">
+            <h3>Upload New Post</h3>
+            <input type="file" id="fileInput">
+            <button onclick="uploadMedia()" id="upBtn">Upload to Magic Cloud ✨</button>
+            <p id="upStatus" style="font-size:12px;"></p>
+        </div>
 
-    <div class="admin-card">
-        <h3>Upload Media</h3>
-        <input type="file" id="fileInput">
-        <button onclick="uploadMedia()" id="upBtn">Upload to Cloud ✨</button>
-    </div>
-
-    <div class="admin-card">
-        <h3>Pending Approvals</h3>
-        <div id="userList">Checking...</div>
+        <!-- Approval Box -->
+        <div class="card">
+            <h3>Pending Requests 👥</h3>
+            <div id="userList">Scanning for new requests...</div>
+        </div>
     </div>
 
 <script>
-const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen" };
+const firebaseConfig = {
+  apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0",
+  authDomain: "fiza-queen.firebaseapp.com",
+  projectId: "fiza-queen",
+  storageBucket: "fiza-queen.firebasestorage.app",
+  appId: "1:534162659941:web:e9f008625f161344f1c48c"
+};
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// Admin Authentication Check
 auth.onAuthStateChanged(user => {
-    if(!user) { window.location.href = "index.html"; }
-    else {
+    if(!user) {
+        window.location.href = "index.html"; 
+    } else {
         db.collection("users").doc(user.uid).get().then(doc => {
-            if(doc.data().role !== 'admin') { alert("Not Admin!"); window.location.href = "index.html"; }
-            else { loadUsers(); }
+            if(!doc.exists || doc.data().role !== 'admin') {
+                alert("Aap admin nahi hain!");
+                window.location.href = "index.html";
+            } else {
+                loadPendingUsers();
+            }
         });
     }
 });
 
 async function uploadMedia() {
     const file = document.getElementById('fileInput').files[0];
-    if(!file) return alert("Select file!");
+    if(!file) return alert("File select karein!");
     const btn = document.getElementById('upBtn');
-    btn.innerText = "Uploading...";
+    btn.disabled = true; btn.innerText = "Uploading...";
+
     const fd = new FormData();
     fd.append("file", file);
     fd.append("upload_preset", "VortEx");
     const type = file.type.startsWith("video") ? "video" : "image";
-    const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${type}/upload`, { method: "POST", body: fd });
-    const data = await res.json();
-    await db.collection("gallery").add({ url: data.secure_url, type: type, time: firebase.firestore.FieldValue.serverTimestamp() });
-    btn.innerText = "Upload to Cloud ✨";
-    alert("Done!");
+
+    try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${type}/upload`, { method: "POST", body: fd });
+        const data = await res.json();
+        await db.collection("gallery").add({
+            url: data.secure_url,
+            type: type,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Success! ✨");
+        location.reload();
+    } catch (e) { alert("Upload Failed!"); }
+    finally { btn.disabled = false; btn.innerText = "Upload to Magic Cloud ✨"; }
 }
 
-function loadUsers() {
+function loadPendingUsers() {
     db.collection("users").where("isApproved", "==", false).onSnapshot(snap => {
         const list = document.getElementById('userList');
-        list.innerHTML = "";
+        list.innerHTML = snap.empty ? "Koi nayi request nahi hai. ☕" : "";
         snap.forEach(doc => {
-            list.innerHTML += `<div class="user-row"><span>${doc.data().email}</span><button onclick="approve('${doc.id}')" style="width:auto; padding:5px 15px;">Approve</button></div>`;
+            const u = doc.data();
+            list.innerHTML += `
+                <div class="user-row">
+                    <span style="font-size:14px;">${u.email}</span>
+                    <button class="approve-btn" onclick="approveUser('${doc.id}')">Approve</button>
+                </div>`;
         });
     });
 }
-function approve(id) { db.collection("users").doc(id).update({ isApproved: true }); }
+
+function approveUser(id) {
+    db.collection("users").doc(id).update({ isApproved: true })
+    .then(() => alert("User Approved! ✅"));
+}
 </script>
 </body>
 </html>
