@@ -5,70 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Admin | Faqiha Alam 👑</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
-        body { font-family: 'Quicksand', sans-serif; background: #0a0a0f; color: white; padding: 20px; text-align: center; }
-        .container { max-width: 600px; margin: auto; }
-        .card { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid #ffb7c5; margin-bottom: 20px; }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; box-sizing: border-box; }
-        button { background: #ffb7c5; color: #111; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #ffa0b0; }
-        .user-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 12px; margin-top: 8px; border-radius: 10px; border-left: 4px solid #ffb7c5; }
-        .approve-btn { width: auto; padding: 6px 15px; margin: 0; background: #2ecc71; color: white; }
+        :root { --accent: #ffb7c5; --danger: #ff4d4d; }
+        body { font-family: 'Quicksand', sans-serif; background: #0a0a0f; color: white; padding: 20px; text-align: center; margin: 0; }
+        
+        /* --- Lock Screen --- */
+        #adminLock { position: fixed; inset: 0; background: #0a0a0f; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .lock-box { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 30px; border: 1px solid var(--accent); width: 300px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; text-align: center; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main { background: var(--accent); color: #111; }
+
+        /* --- Admin Panel Content --- */
+        #adminContent { display: none; max-width: 800px; margin: auto; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid var(--accent); margin-bottom: 30px; }
+        
+        /* --- Manage Media List --- */
+        .manage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
+        .manage-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.1); }
+        .manage-item img, .manage-item video { width: 100%; height: 100%; object-fit: cover; }
+        .del-btn { position: absolute; top: 5px; right: 5px; background: var(--danger); color: white; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 style="color:#ffb7c5; font-size: 2.5rem;">Faqiha's Control 👑</h1>
-        
-        <!-- Upload Box -->
-        <div class="card">
-            <h3>Upload New Post</h3>
-            <input type="file" id="fileInput">
-            <button onclick="uploadMedia()" id="upBtn">Upload to Magic Cloud ✨</button>
-            <p id="upStatus" style="font-size:12px;"></p>
-        </div>
 
-        <!-- Approval Box -->
-        <div class="card">
-            <h3>Pending Requests 👥</h3>
-            <div id="userList">Scanning for new requests...</div>
-        </div>
+<div id="adminLock">
+    <div class="lock-box">
+        <h2 style="color:var(--accent)">Admin Login</h2>
+        <input type="password" id="adminPass" placeholder="Admin Secret Key">
+        <button onclick="unlockAdmin()" class="btn btn-main">Access Panel 👑</button>
+    </div>
+</div>
+
+<div id="adminContent">
+    <h1>Faqiha's Control Panel 👑</h1>
+
+    <div class="card">
+        <h3>Upload New Media</h3>
+        <input type="file" id="fileInput">
+        <button onclick="uploadMedia()" id="upBtn" class="btn btn-main">Upload ✨</button>
+        <p id="upStatus" style="font-size:12px; margin-top:10px;"></p>
     </div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0",
-  authDomain: "fiza-queen.firebaseapp.com",
-  projectId: "fiza-queen",
-  storageBucket: "fiza-queen.firebasestorage.app",
-  appId: "1:534162659941:web:e9f008625f161344f1c48c"
-};
+    <div class="card">
+        <h3>Manage Gallery (Delete) 🗑️</h3>
+        <div class="manage-grid" id="manageGrid"></div>
+    </div>
+</div>
 
+<script>
+const firebaseConfig = { 
+    apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", 
+    projectId: "fiza-queen" 
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth();
 
-// Admin Authentication Check
-auth.onAuthStateChanged(user => {
-    if(!user) {
-        window.location.href = "index.html"; 
+// 1. Unlock Admin Function
+function unlockAdmin() {
+    const pass = document.getElementById('adminPass').value;
+    if(pass === 'VORTEXLOVEFAQI') {
+        document.getElementById('adminLock').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+        loadManageGrid();
     } else {
-        db.collection("users").doc(user.uid).get().then(doc => {
-            if(!doc.exists || doc.data().role !== 'admin') {
-                alert("Aap admin nahi hain!");
-                window.location.href = "index.html";
-            } else {
-                loadPendingUsers();
-            }
-        });
+        alert("Wrong Admin Key! ❌");
     }
-});
+}
 
+// 2. Upload Function
 async function uploadMedia() {
     const file = document.getElementById('fileInput').files[0];
-    if(!file) return alert("File select karein!");
+    if(!file) return alert("File choose karein!");
     const btn = document.getElementById('upBtn');
     btn.disabled = true; btn.innerText = "Uploading...";
 
@@ -85,30 +97,34 @@ async function uploadMedia() {
             type: type,
             time: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert("Success! ✨");
+        alert("Success! Gallery me add ho gaya. ✨");
         location.reload();
     } catch (e) { alert("Upload Failed!"); }
-    finally { btn.disabled = false; btn.innerText = "Upload to Magic Cloud ✨"; }
 }
 
-function loadPendingUsers() {
-    db.collection("users").where("isApproved", "==", false).onSnapshot(snap => {
-        const list = document.getElementById('userList');
-        list.innerHTML = snap.empty ? "Koi nayi request nahi hai. ☕" : "";
+// 3. Load Media for Deleting
+function loadManageGrid() {
+    db.collection("gallery").orderBy("time", "desc").onSnapshot(snap => {
+        const grid = document.getElementById('manageGrid');
+        grid.innerHTML = "";
         snap.forEach(doc => {
-            const u = doc.data();
-            list.innerHTML += `
-                <div class="user-row">
-                    <span style="font-size:14px;">${u.email}</span>
-                    <button class="approve-btn" onclick="approveUser('${doc.id}')">Approve</button>
+            const item = doc.data();
+            grid.innerHTML += `
+                <div class="manage-item">
+                    ${item.type.includes('image') ? `<img src="${item.url}">` : `<video src="${item.url}"></video>`}
+                    <button class="del-btn" onclick="deleteMedia('${doc.id}')"><i class="fas fa-trash"></i></button>
                 </div>`;
         });
     });
 }
 
-function approveUser(id) {
-    db.collection("users").doc(id).update({ isApproved: true })
-    .then(() => alert("User Approved! ✅"));
+// 4. Delete Function
+function deleteMedia(docId) {
+    if(confirm("Kya aap waqai is pic/video ko delete karna chahte hain?")) {
+        db.collection("gallery").doc(docId).delete().then(() => {
+            alert("Deleted! 🗑️");
+        }).catch(err => alert("Error: " + err));
+    }
 }
 </script>
 </body>
