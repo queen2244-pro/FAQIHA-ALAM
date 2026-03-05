@@ -13,13 +13,10 @@
     </style>
 </head>
 <body oncontextmenu="return false;">
-
 <div class="overlay"></div>
 <div class="container">
     <h1>THE VORT3X</h1>
     <div id="adminTag" style="display:none;"><span class="admin-badge">ADMIN ACCESS</span></div>
-
-    <!-- Admin Panel Area -->
     <div id="adminView" class="view-section">
         <div class="glass-card">
             <h3>Cloud Upload 🚀</h3>
@@ -28,14 +25,8 @@
             <button class="btn" onclick="_0x4f2a()" id="upBtn">Inject to Vortex</button>
             <div id="status" style="margin-top:10px; font-size:12px; color:var(--accent);"></div>
         </div>
-        <div class="glass-card">
-            <h3>User Requests 👥</h3>
-            <div id="userList">Scanning...</div>
-        </div>
         <button class="btn" style="background:transparent;color:#fff;border:1px solid #fff;" onclick="_0x5e1b()">View Gallery</button>
     </div>
-
-    <!-- User Gallery Area -->
     <div id="userView" class="view-section active">
         <div style="display:flex;gap:10px;justify-content:center;margin:20px 0;">
             <button class="btn" style="width:auto" onclick="_0x9a1c('Moments')">Moments</button>
@@ -43,15 +34,11 @@
         </div>
         <div class="gallery-grid" id="grid"></div>
         <br>
-        <button id="toAdminBtn" class="btn" style="display:none;width:auto" onclick="_0x1d2e()">Go to Admin Panel</button>
+        <button id="toAdminBtn" class="btn" style="display:none;width:auto" onclick="_0x1d2e()">Admin Panel</button>
+        <button id="loginLink" class="btn" style="width:auto; background:rgba(255,255,255,0.1);" onclick="window.location.href='login.html'">Login</button>
     </div>
-
-    <footer>
-        <div class="footer-name">IBN E RAUF</div>
-        <div class="footer-year">2026</div>
-    </footer>
+    <footer><div class="footer-name">IBN E RAUF</div><div class="footer-year">2026</div></footer>
 </div>
-
 <script>
 const _0x55a = { a: "dawtxacmr", b: "VortEx", c: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", d: "fiza-queen" };
 firebase.initializeApp({ apiKey: _0x55a.c, projectId: _0x55a.d, databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" });
@@ -59,18 +46,15 @@ const _db = firebase.firestore(); const _auth = firebase.auth();
 
 _auth.onAuthStateChanged(u => {
     if (u) {
+        document.getElementById('loginLink').style.display = 'none';
         _db.collection("users").doc(u.uid).get().then(d => {
             if (d.exists && d.data().role === 'admin') {
                 document.getElementById('toAdminBtn').style.display = 'inline-block';
                 document.getElementById('adminTag').style.display = 'block';
-                _0xf3a();
             }
         });
-        _0x9a1c('Moments');
-    } else { 
-        // Redirect if not logged in
-        setTimeout(() => { if(!_auth.currentUser) window.location.href = "login.html"; }, 2000);
     }
+    _0x9a1c('Moments');
 });
 
 function _0x1d2e() { document.getElementById('userView').classList.remove('active'); document.getElementById('adminView').classList.add('active'); }
@@ -81,23 +65,18 @@ async function _0x4f2a() {
     const c = document.getElementById('catSelect').value;
     const s = document.getElementById('status');
     const b = document.getElementById('upBtn');
-    if (!f) return alert("Select a file first!");
-    
-    b.disabled = true;
-    s.innerText = "🌀 Vortex Syncing...";
-    
+    if (!f) return;
+    b.disabled = true; s.innerText = "🌀 Syncing...";
     const r = f.type.startsWith("video") ? "video" : "image";
     const fd = new FormData(); fd.append("file", f); fd.append("upload_preset", _0x55a.b);
-    
     try {
         const res = await fetch(`https://api.cloudinary.com/v1_1/${_0x55a.a}/${r}/upload`, { method: "POST", body: fd });
         const data = await res.json();
         if (data.secure_url) {
             await _db.collection("gallery").add({ url: data.secure_url, cat: c, type: r, time: firebase.firestore.FieldValue.serverTimestamp() });
-            s.innerText = "✨ Memory Injected!";
-            document.getElementById('fileInput').value = "";
+            s.innerText = "✅ Injected!";
         }
-    } catch (e) { s.innerText = "❌ Error Occurred"; }
+    } catch (e) { s.innerText = "❌ Error"; }
     finally { b.disabled = false; }
 }
 
@@ -114,24 +93,6 @@ function _0x9a1c(cat) {
         });
     });
 }
-
-function _0xf3a() {
-    _db.collection("users").where("isApproved", "==", false).onSnapshot(sn => {
-        const l = document.getElementById('userList');
-        l.innerHTML = sn.empty ? "<p style='font-size:12px;opacity:0.5;'>System Secure</p>" : "";
-        sn.forEach(doc => {
-            l.innerHTML += `<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.05);padding:10px;border-radius:15px;margin-bottom:5px;">
-                <span style="font-size:11px;">${doc.data().email}</span>
-                <button onclick="_0xee('${doc.id}')" style="background:#25d366;border:none;color:white;border-radius:5px;cursor:pointer;padding:2px 10px;">OK</button>
-            </div>`;
-        });
-    });
-}
-function _0xee(id) { _db.collection("users").doc(id).update({ isApproved: true }); }
-
-document.onkeydown = function(e) {
-    if(e.keyCode == 123 || (e.ctrlKey && (e.shiftKey && e.keyCode == 73)) || (e.ctrlKey && e.keyCode == 85)) return false;
-};
 </script>
 </body>
 </html>
