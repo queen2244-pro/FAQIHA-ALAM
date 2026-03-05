@@ -3,96 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VORT3X | 2026 👑</title>
+    <title>FAQIHA ALAM | 2026 👑</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root{--accent:#ffb7c5;--glass:rgba(255,255,255,0.08)}body{font-family:'Quicksand',sans-serif;margin:0;color:#fff;background:url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed;background-size:cover;overflow-x:hidden;min-height:100vh}.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,13,21,0.9);z-index:-1}.container{max-width:800px;margin:0 auto;padding:20px;text-align:center}h1{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:var(--accent);letter-spacing:5px;text-shadow:0 0 20px rgba(255,183,197,0.6);margin-top:30px}.view-section{display:none}.view-section.active{display:block}.glass-card{background:var(--glass);backdrop-filter:blur(25px);padding:25px;border-radius:35px;border:1px solid rgba(255,183,197,0.3);margin-bottom:25px;box-shadow:0 15px 35px rgba(0,0,0,0.5)}input,select{width:100%;padding:12px;margin:10px 0;border-radius:15px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.4);color:#fff;text-align:center;outline:none}.btn{background:var(--accent);color:#111;border:none;padding:12px 25px;border-radius:50px;cursor:pointer;font-weight:700;transition:.3s;width:100%;margin-top:10px}.btn:hover{transform:scale(1.02);box-shadow:0 0 20px var(--accent)}.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:15px;margin-top:20px}.media-card{background:var(--glass);border-radius:15px;overflow:hidden;aspect-ratio:1/1;border:1px solid rgba(255,255,255,0.1)}.media-card img,.media-card video{width:100%;height:100%;object-fit:cover}.admin-badge{background:#ff4757;color:#fff;padding:5px 15px;border-radius:50px;font-size:10px;display:inline-block;margin-bottom:10px;letter-spacing:2px}footer{margin-top:50px;padding-bottom:30px}.footer-name{letter-spacing:5px;font-weight:700;color:var(--accent);font-size:14px;text-transform:uppercase}.footer-year{font-size:10px;opacity:.6;margin-top:5px;letter-spacing:2px}
+        :root{--accent:#ffb7c5;--glass:rgba(255,255,255,0.08)}
+        body{font-family:'Quicksand',sans-serif;margin:0;color:#fff;background:url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed;background-size:cover;min-height:100vh;display:flex;justify-content:center;align-items:center}
+        .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,13,21,0.96);z-index:-1}
+        .container{width:100%;max-width:800px;text-align:center;padding:20px;display:none;}
+        h1{font-family:'Orbitron',sans-serif;color:var(--accent);letter-spacing:5px;text-transform:uppercase;text-shadow:0 0 20px rgba(255,183,197,0.6)}
+        .glass-card{background:var(--glass);backdrop-filter:blur(25px);padding:25px;border-radius:35px;border:1px solid rgba(255,183,197,0.3);margin-bottom:25px}
+        .btn{background:var(--accent);color:#111;border:none;padding:12px 25px;border-radius:50px;cursor:pointer;font-weight:700;width:100%;margin-top:10px;transition:0.3s}
+        .btn:hover{transform:scale(1.02);box-shadow:0 0 20px var(--accent)}
+        .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:15px;margin-top:20px}
+        .media-card{background:var(--glass);border-radius:15px;overflow:hidden;aspect-ratio:1/1;border:1px solid rgba(255,255,255,0.1)}
+        .media-card img,.media-card video{width:100%;height:100%;object-fit:cover}
+        #loading{color:var(--accent);font-family:'Orbitron',sans-serif;letter-spacing:2px;text-align:center}
+        input[type="file"]{width:100%;padding:10px;margin:10px 0;background:rgba(0,0,0,0.4);color:white;border-radius:10px;border:1px solid rgba(255,255,255,0.1)}
     </style>
 </head>
 <body oncontextmenu="return false;">
 <div class="overlay"></div>
-<div class="container">
-    <h1>THE VORT3X</h1>
-    <div id="adminTag" style="display:none;"><span class="admin-badge">ADMIN ACCESS</span></div>
-    <div id="adminView" class="view-section">
-        <div class="glass-card">
-            <h3>Cloud Upload 🚀</h3>
-            <input type="file" id="fileInput" accept="image/*,video/*">
-            <select id="catSelect"><option value="Moments">Moments 🌸</option><option value="Videos">Videos 🎥</option></select>
-            <button class="btn" onclick="_0x4f2a()" id="upBtn">Inject to Vortex</button>
-            <div id="status" style="margin-top:10px; font-size:12px; color:var(--accent);"></div>
-        </div>
-        <button class="btn" style="background:transparent;color:#fff;border:1px solid #fff;" onclick="_0x5e1b()">View Gallery</button>
-    </div>
-    <div id="userView" class="view-section active">
-        <div style="display:flex;gap:10px;justify-content:center;margin:20px 0;">
-            <button class="btn" style="width:auto" onclick="_0x9a1c('Moments')">Moments</button>
-            <button class="btn" style="width:auto" onclick="_0x9a1c('Videos')">Videos</button>
-        </div>
-        <div class="gallery-grid" id="grid"></div>
-        <br>
-        <button id="toAdminBtn" class="btn" style="display:none;width:auto" onclick="_0x1d2e()">Admin Panel</button>
-        <button id="loginLink" class="btn" style="width:auto; background:rgba(255,255,255,0.1);" onclick="window.location.href='login.html'">Login</button>
-    </div>
-    <footer><div class="footer-name">IBN E RAUF</div><div class="footer-year">2026</div></footer>
-</div>
-<script>
-const _0x55a = { a: "dawtxacmr", b: "VortEx", c: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", d: "fiza-queen" };
-firebase.initializeApp({ apiKey: _0x55a.c, projectId: _0x55a.d, databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" });
-const _db = firebase.firestore(); const _auth = firebase.auth();
+<div id="loading">SCANNING ACCESS...</div>
 
-_auth.onAuthStateChanged(u => {
-    if (u) {
-        document.getElementById('loginLink').style.display = 'none';
-        _db.collection("users").doc(u.uid).get().then(d => {
-            if (d.exists && d.data().role === 'admin') {
-                document.getElementById('toAdminBtn').style.display = 'inline-block';
-                document.getElementById('adminTag').style.display = 'block';
+<div class="container" id="mainApp">
+    <h1>FAQIHA ALAM</h1>
+    
+    <!-- Admin Controls -->
+    <div id="adminView" style="display:none;" class="glass-card">
+        <h3 style="color:var(--accent);margin-top:0;">Admin Console 👑</h3>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <button class="btn" onclick="uploadMedia()" id="upBtn">Upload Memory</button>
+        <div id="status" style="font-size:12px;margin-top:10px;color:var(--accent);"></div>
+    </div>
+
+    <!-- User Gallery -->
+    <div id="userView">
+        <div class="gallery-grid" id="grid"></div>
+        <button class="btn" style="width:auto;margin-top:30px;background:transparent;color:white;border:1px solid white;" onclick="firebase.auth().signOut()">Logout</button>
+    </div>
+</div>
+
+<script>
+// Firebase Config (Same as before)
+const firebaseConfig = { 
+    apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", 
+    projectId: "fiza-queen", 
+    databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" 
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+auth.onAuthStateChanged(user => {
+    if (!user) {
+        window.location.href = "login.html";
+    } else {
+        db.collection("users").doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.isApproved || data.role === 'admin') {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    if(data.role === 'admin') document.getElementById('adminView').style.display = 'block';
+                    loadGallery();
+                } else {
+                    document.getElementById('loading').innerHTML = "ACCESS DENIED<br><span style='font-size:12px;font-family:Quicksand;'>Waiting for Admin Approval...</span>";
+                }
+            } else {
+                document.getElementById('loading').innerHTML = "SYSTEM ERROR<br><span style='font-size:12px;'>User record not found.</span>";
             }
         });
     }
-    _0x9a1c('Moments');
 });
 
-function _0x1d2e() { document.getElementById('userView').classList.remove('active'); document.getElementById('adminView').classList.add('active'); }
-function _0x5e1b() { document.getElementById('adminView').classList.remove('active'); document.getElementById('userView').classList.add('active'); }
-
-async function _0x4f2a() {
-    const f = document.getElementById('fileInput').files[0];
-    const c = document.getElementById('catSelect').value;
-    const s = document.getElementById('status');
-    const b = document.getElementById('upBtn');
-    if (!f) return;
-    b.disabled = true; s.innerText = "🌀 Syncing...";
-    const r = f.type.startsWith("video") ? "video" : "image";
-    const fd = new FormData(); fd.append("file", f); fd.append("upload_preset", _0x55a.b);
-    try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${_0x55a.a}/${r}/upload`, { method: "POST", body: fd });
-        const data = await res.json();
-        if (data.secure_url) {
-            await _db.collection("gallery").add({ url: data.secure_url, cat: c, type: r, time: firebase.firestore.FieldValue.serverTimestamp() });
-            s.innerText = "✅ Injected!";
-        }
-    } catch (e) { s.innerText = "❌ Error"; }
-    finally { b.disabled = false; }
-}
-
-function _0x9a1c(cat) {
-    const g = document.getElementById('grid');
-    _db.collection("gallery").where("cat", "==", cat).orderBy("time", "desc").onSnapshot(sn => {
+function loadGallery() {
+    db.collection("gallery").orderBy("time", "desc").onSnapshot(sn => {
+        const g = document.getElementById('grid');
         g.innerHTML = "";
-        sn.forEach(doc => {
-            const d = doc.data();
-            const div = document.createElement('div');
-            div.className = 'media-card';
-            div.innerHTML = d.type === 'video' ? `<video src="${d.url}" controls></video>` : `<img src="${d.url}" onclick="window.open('${d.url}')">`;
-            g.appendChild(div);
+        sn.forEach(d => {
+            const data = d.data();
+            const card = document.createElement('div');
+            card.className = 'media-card';
+            card.innerHTML = data.type === 'video' ? `<video src="${data.url}" controls></video>` : `<img src="${data.url}" onclick="window.open('${data.url}')">`;
+            g.appendChild(card);
         });
     });
 }
+
+async function uploadMedia() {
+    const f = document.getElementById('fileInput').files[0];
+    const s = document.getElementById('status');
+    const b = document.getElementById('upBtn');
+    if(!f) return alert("Select a file!");
+    
+    b.disabled = true;
+    s.innerText = "🌀 Syncing with Cloud...";
+    
+    const fd = new FormData();
+    fd.append("file", f);
+    fd.append("upload_preset", "VortEx");
+    const r = f.type.startsWith("video") ? "video" : "image";
+    
+    try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${r}/upload`, {method:"POST", body:fd});
+        const d = await res.json();
+        if(d.secure_url) {
+            await db.collection("gallery").add({
+                url: d.secure_url, 
+                type: r, 
+                time: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            s.innerText = "✅ Successfully Added!";
+            document.getElementById('fileInput').value = "";
+        }
+    } catch(e) { s.innerText = "❌ Upload Failed"; }
+    finally { b.disabled = false; }
+}
+
+// Right Click and Inspect Disable
+document.onkeydown = function(e) {
+    if(e.keyCode == 123 || (e.ctrlKey && (e.shiftKey && e.keyCode == 73)) || (e.ctrlKey && e.keyCode == 85)) return false;
+};
 </script>
 </body>
 </html>
