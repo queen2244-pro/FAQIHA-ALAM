@@ -9,17 +9,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #ffb7c5; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #ffb7c5; }
         body { font-family: 'Quicksand', sans-serif; margin: 0; color: white; background: url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed; background-size: cover; min-height: 100vh; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 13, 21, 0.8); z-index: -1; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 13, 21, 0.85); z-index: -1; }
         .page { display: none; padding: 20px; animation: softFade 0.8s ease; }
         .active { display: block; }
         @keyframes softFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         .auth-container { text-align: center; margin-top: 15vh; }
-        .cute-glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid var(--accent); display: inline-block; width: 320px; }
+        .cute-glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid var(--accent); display: inline-block; width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         .cute-glass-box h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--accent); margin: 0; }
         input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; text-align: center; outline: none; }
-        .cute-btn { background: var(--accent); color: #222; border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+        .cute-btn { background: var(--accent); color: #222; border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 16px; transition: 0.3s; }
         header { text-align: center; margin: 40px 0; }
         h1 { font-family: 'Dancing Script', cursive; font-size: 4rem; margin: 0; color: var(--accent); }
         .quote-box { background: rgba(0,0,0,0.4); display: inline-block; padding: 8px 25px; border-radius: 50px; border: 1px solid var(--accent); }
@@ -27,12 +27,13 @@
         .card { background: rgba(255,255,255,0.05); border-radius: 30px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; }
         .media-box { width: 100%; height: 380px; }
         img, video { width: 100%; height: 100%; object-fit: cover; }
-        .dl-btn { background: var(--accent); color: #000; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; }
+        .dl-btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="overlay"></div>
 
+<!-- Login/Signup Section -->
 <div id="authPage" class="page active auth-container">
     <div class="cute-glass-box">
         <h2 id="authTitle">Faqiha Alam</h2>
@@ -43,17 +44,27 @@
     </div>
 </div>
 
+<!-- Gallery Section -->
 <div id="userPage" class="page">
     <header>
         <h1>Faqiha Alam</h1>
-        <div class="quote-box"><div id="matrixText" class="matrix-quote"></div></div>
+        <div class="quote-box"><div id="matrixText"></div></div>
     </header>
-    <div style="margin-bottom:20px;"><button onclick="auth.signOut(); location.reload();" class="cute-btn" style="width:auto; padding:10px 30px;">Logout</button></div>
+    <div style="text-align:center; margin-bottom:20px;">
+        <button onclick="auth.signOut(); location.reload();" class="cute-btn" style="width:auto; padding:10px 30px;">Logout</button>
+    </div>
     <div class="grid" id="userGrid"></div>
 </div>
 
 <script>
-const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen", databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" };
+const firebaseConfig = {
+  apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0",
+  authDomain: "fiza-queen.firebaseapp.com",
+  projectId: "fiza-queen",
+  storageBucket: "fiza-queen.firebasestorage.app",
+  appId: "1:534162659941:web:e9f008625f161344f1c48c"
+};
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -68,43 +79,59 @@ function toggleAuth() {
 function handleAuth() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
+    if(!email || !pass) return alert("Please fill fields! ✨");
+
     if(isLoginMode) {
-        auth.signInWithEmailAndPassword(email, pass).then(res => checkApproval(res.user.uid)).catch(e => alert(e.message));
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(res => checkApproval(res.user.uid))
+            .catch(e => alert(e.message));
     } else {
         auth.createUserWithEmailAndPassword(email, pass).then(res => {
-            db.collection("users").doc(res.user.uid).set({ email, isApproved: false, role: 'user' });
-            alert("Wait for approval! 🌸");
-            location.reload();
+            db.collection("users").doc(res.user.uid).set({ 
+                email: email, 
+                isApproved: false, 
+                role: 'user',
+                requestTime: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert("Request Sent! 🌸 Please ask Faqiha to approve you.");
+                auth.signOut();
+                location.reload();
+            });
         }).catch(e => alert(e.message));
     }
 }
 
 function checkApproval(uid) {
     db.collection("users").doc(uid).get().then(doc => {
-        if(doc.data() && (doc.data().isApproved || doc.data().role === 'admin')) {
-            showPage('userPage'); loadGallery(); startTyping();
-        } else { alert("Not Approved yet! ⏳"); auth.signOut(); }
+        const data = doc.data();
+        if(data && (data.isApproved || data.role === 'admin')) {
+            document.getElementById('authPage').classList.remove('active');
+            document.getElementById('userPage').classList.add('active');
+            loadGallery(); startTyping();
+        } else { 
+            alert("Access Pending! ⏳ Wait for Faqiha's approval."); 
+            auth.signOut(); 
+        }
     });
 }
 
-function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-
 function loadGallery() {
     db.collection("gallery").orderBy("time", "desc").onSnapshot(snap => {
-        const grid = document.getElementById('userGrid'); grid.innerHTML = '';
+        const grid = document.getElementById('userGrid'); 
+        grid.innerHTML = '';
         snap.forEach(doc => {
             const item = doc.data();
-            grid.innerHTML += `<div class="card"><div class="media-box">${item.type.includes('image') ? `<img src="${item.url}">` : `<video src="${item.url}" controls></video>`}</div><button class="dl-btn" onclick="downloadMe('${item.url}')">Download</button></div>`;
+            grid.innerHTML += `<div class="card">
+                <div class="media-box">${item.type.includes('image') ? `<img src="${item.url}">` : `<video src="${item.url}" controls></video>`}</div>
+                <button class="dl-btn" onclick="window.open('${item.url}', '_blank')">Download</button>
+            </div>`;
         });
     });
 }
 
-function downloadMe(url) { window.open(url, '_blank'); }
-
 function startTyping() {
-    const target = document.getElementById('matrixText');
     const text = "خوبصورت ہیں وہ دل جو وفا پہ قائم رہتے ہیں 🌸✨";
-    let i = 0; target.innerHTML = "";
+    let i = 0; const target = document.getElementById('matrixText');
     function type() { if(i < text.length) { target.innerHTML += text.charAt(i); i++; setTimeout(type, 120); } }
     type();
 }
