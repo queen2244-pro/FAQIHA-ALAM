@@ -8,72 +8,81 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root{--accent:#ffb7c5;--glass:rgba(255,255,255,0.08)}
-        body{font-family:'Quicksand',sans-serif;margin:0;color:#fff;background:url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed;background-size:cover;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,13,21,0.96);z-index:-1}
-        .container{width:100%;max-width:800px;text-align:center;padding:20px;display:none;}
-        h1{font-family:'Orbitron',sans-serif;color:var(--accent);letter-spacing:5px;text-transform:uppercase;text-shadow:0 0 20px rgba(255,183,197,0.6)}
-        .glass-card{background:var(--glass);backdrop-filter:blur(25px);padding:25px;border-radius:35px;border:1px solid rgba(255,183,197,0.3);margin-bottom:25px}
-        .btn{background:var(--accent);color:#111;border:none;padding:12px 25px;border-radius:50px;cursor:pointer;font-weight:700;width:100%;margin-top:10px;transition:0.3s}
-        .btn:hover{transform:scale(1.02);box-shadow:0 0 20px var(--accent)}
-        .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:15px;margin-top:20px}
-        .media-card{background:var(--glass);border-radius:15px;overflow:hidden;aspect-ratio:1/1;border:1px solid rgba(255,255,255,0.1)}
-        .media-card img,.media-card video{width:100%;height:100%;object-fit:cover}
-        #loading{color:var(--accent);font-family:'Orbitron',sans-serif;letter-spacing:2px;text-align:center}
-        input[type="file"]{width:100%;padding:10px;margin:10px 0;background:rgba(0,0,0,0.4);color:white;border-radius:10px;border:1px solid rgba(255,255,255,0.1)}
+        :root{--accent:#ffb7c5;--glass:rgba(255,255,255,0.08);--neon:0 0 15px rgba(255,183,197,0.5)}
+        body{font-family:'Quicksand',sans-serif;margin:0;color:#fff;background:url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed;background-size:cover;min-height:100vh}
+        .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,0.97);z-index:-1}
+        .container{max-width:1000px;margin:auto;padding:20px;display:none;animation:fadeIn 1s ease-in;text-align:center}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        h1{font-family:'Orbitron',sans-serif;color:var(--accent);letter-spacing:8px;text-transform:uppercase;margin-top:50px;text-shadow:var(--neon)}
+        .glass-card{background:var(--glass);backdrop-filter:blur(30px);padding:30px;border-radius:40px;border:1px solid rgba(255,183,197,0.2);margin-bottom:30px}
+        .btn{background:var(--accent);color:#111;border:none;padding:12px 30px;border-radius:50px;cursor:pointer;font-weight:700;margin-top:15px;transition:0.4s;text-transform:uppercase}
+        .btn:hover{box-shadow:var(--neon);transform:translateY(-2px)}
+        select, input{width:100%;padding:14px;margin:10px 0;border-radius:15px;background:rgba(0,0,0,0.6);color:white;border:1px solid rgba(255,183,197,0.3);outline:none}
+        .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:25px;margin-top:40px}
+        .media-card{background:var(--glass);border-radius:25px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);position:relative;transition:0.5s;display:flex;flex-direction:column}
+        .media-card:hover{border-color:var(--accent)}
+        .media-content{width:100%;aspect-ratio:1/1;object-fit:cover;cursor:pointer}
+        .dl-btn{background:rgba(255,255,255,0.1);color:white;border:none;padding:10px;cursor:pointer;width:100%;transition:0.3s;font-size:14px;border-top:1px solid rgba(255,255,255,0.1)}
+        .dl-btn:hover{background:var(--accent);color:#000}
+        .lock-overlay{position:absolute;top:0;left:0;width:100%;height:calc(100% - 40px);background:rgba(0,0,0,0.9);display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--accent);z-index:5}
+        .cat-badge{position:absolute;top:15px;left:15px;background:var(--accent);color:#000;font-size:10px;padding:4px 10px;border-radius:8px;font-weight:bold;z-index:10}
+        .wa-float{position:fixed;bottom:40px;right:40px;background:#25d366;width:65px;height:65px;border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;font-size:35px;z-index:1000}
+        #loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron';color:var(--accent);text-align:center}
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 <div class="overlay"></div>
-<div id="loading">SCANNING ACCESS...</div>
+<div id="loading">DECRYPTING...</div>
+
+<a href="https://wa.me/923278084152" class="wa-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <div class="container" id="mainApp">
     <h1>FAQIHA ALAM</h1>
-    
-    <!-- Admin Controls -->
-    <div id="adminView" style="display:none;" class="glass-card">
-        <h3 style="color:var(--accent);margin-top:0;">Admin Console 👑</h3>
-        <input type="file" id="fileInput" accept="image/*,video/*">
-        <button class="btn" onclick="uploadMedia()" id="upBtn">Upload Memory</button>
-        <div id="status" style="font-size:12px;margin-top:10px;color:var(--accent);"></div>
+
+    <div id="adminView" style="display:none;">
+        <div class="glass-card">
+            <h3 style="color:var(--accent);margin-bottom:20px;">Master Control 👑</h3>
+            <input type="file" id="fileInput" accept="image/*,video/*">
+            <div style="display:flex;gap:10px;">
+                <select id="categoryInput">
+                    <option value="Moments">Moments</option>
+                    <option value="Archives">Archives</option>
+                </select>
+                <input type="text" id="keyInput" placeholder="Secret Key (Optional)">
+            </div>
+            <button class="btn" onclick="uploadMedia()" id="upBtn" style="width:100%;">Upload Securely</button>
+            <div id="status" style="font-size:12px;margin-top:10px;color:var(--accent);"></div>
+        </div>
     </div>
 
-    <!-- User Gallery -->
     <div id="userView">
         <div class="gallery-grid" id="grid"></div>
-        <button class="btn" style="width:auto;margin-top:30px;background:transparent;color:white;border:1px solid white;" onclick="firebase.auth().signOut()">Logout</button>
+        <button class="btn" style="background:transparent;color:white;border:1px solid white;margin:60px 0;" onclick="firebase.auth().signOut()">Logout</button>
     </div>
 </div>
 
 <script>
-// Firebase Config (Same as before)
-const firebaseConfig = { 
-    apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", 
-    projectId: "fiza-queen", 
-    databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" 
-};
+const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen", databaseURL: "https://fiza-queen-default-rtdb.firebaseio.com" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+let userRole = 'user';
+
 auth.onAuthStateChanged(user => {
-    if (!user) {
-        window.location.href = "login.html";
-    } else {
-        db.collection("users").doc(user.uid).get().then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.isApproved || data.role === 'admin') {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    if(data.role === 'admin') document.getElementById('adminView').style.display = 'block';
-                    loadGallery();
-                } else {
-                    document.getElementById('loading').innerHTML = "ACCESS DENIED<br><span style='font-size:12px;font-family:Quicksand;'>Waiting for Admin Approval...</span>";
-                }
+    if (!user) { window.location.href = "login.html"; }
+    else {
+        db.collection("users").doc(user.uid).onSnapshot(doc => {
+            if (doc.exists && (doc.data().isApproved || doc.data().role === 'admin')) {
+                userRole = doc.data().role;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                if(userRole === 'admin') document.getElementById('adminView').style.display = 'block';
+                loadGallery();
             } else {
-                document.getElementById('loading').innerHTML = "SYSTEM ERROR<br><span style='font-size:12px;'>User record not found.</span>";
+                document.getElementById('loading').innerHTML = "SIGNAL BLOCKED<br>Waiting for Approval.";
             }
         });
     }
@@ -87,46 +96,65 @@ function loadGallery() {
             const data = d.data();
             const card = document.createElement('div');
             card.className = 'media-card';
-            card.innerHTML = data.type === 'video' ? `<video src="${data.url}" controls></video>` : `<img src="${data.url}" onclick="window.open('${data.url}')">`;
+            
+            let isLocked = data.secretKey && data.secretKey !== "";
+            let content = data.type === 'video' ? `<video class="media-content" src="${data.url}"></video>` : `<img class="media-content" src="${data.url}">`;
+            let lockHtml = (isLocked && userRole !== 'admin') ? `<div class="lock-overlay"><i class="fas fa-lock"></i></div>` : '';
+            
+            // Download logic
+            card.innerHTML = `<div class="cat-badge">${data.category}</div> ${content} ${lockHtml} <button class="dl-btn" onclick="downloadFile('${data.url}', '${data.type}', '${data.secretKey}')"><i class="fas fa-download"></i> Save</button>`;
+            
             g.appendChild(card);
         });
     });
 }
 
+async function downloadFile(url, type, key) {
+    if(key && userRole !== 'admin') {
+        let attempt = prompt("Enter Secret Key to Download:");
+        if(attempt !== key) return alert("Wrong Key!");
+    }
+    
+    // Cloudinary download logic
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `FAQIHA_${Date.now()}.${type === 'video' ? 'mp4' : 'jpg'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 async function uploadMedia() {
     const f = document.getElementById('fileInput').files[0];
+    const cat = document.getElementById('categoryInput').value;
+    const key = document.getElementById('keyInput').value;
     const s = document.getElementById('status');
     const b = document.getElementById('upBtn');
-    if(!f) return alert("Select a file!");
-    
-    b.disabled = true;
-    s.innerText = "🌀 Syncing with Cloud...";
-    
+
+    if(!f) return alert("Select file!");
+    b.disabled = true; s.innerText = "⚡ TRANSMITTING...";
+
     const fd = new FormData();
     fd.append("file", f);
     fd.append("upload_preset", "VortEx");
-    const r = f.type.startsWith("video") ? "video" : "image";
-    
+    const type = f.type.startsWith("video") ? "video" : "image";
+
     try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${r}/upload`, {method:"POST", body:fd});
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${type}/upload`, {method:"POST", body:fd});
         const d = await res.json();
-        if(d.secure_url) {
-            await db.collection("gallery").add({
-                url: d.secure_url, 
-                type: r, 
-                time: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            s.innerText = "✅ Successfully Added!";
-            document.getElementById('fileInput').value = "";
-        }
-    } catch(e) { s.innerText = "❌ Upload Failed"; }
+        await db.collection("gallery").add({
+            url: d.secure_url,
+            type: type,
+            category: cat,
+            secretKey: key,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        s.innerText = "SUCCESS: Uploaded.";
+    } catch(e) { s.innerText = "ERROR: Failed."; }
     finally { b.disabled = false; }
 }
-
-// Right Click and Inspect Disable
-document.onkeydown = function(e) {
-    if(e.keyCode == 123 || (e.ctrlKey && (e.shiftKey && e.keyCode == 73)) || (e.ctrlKey && e.keyCode == 85)) return false;
-};
 </script>
 </body>
 </html>
