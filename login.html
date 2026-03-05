@@ -3,37 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VORT3X | Enter 🔑</title>
+    <title>Admin Panel | Faqiha Alam 👑</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        :root{--accent:#ffb7c5;--glass:rgba(255,255,255,0.08)}body{font-family:'Quicksand',sans-serif;margin:0;color:#fff;background:url('https://vortexhostingfree.ct.ws//uploads/1772646155.jpg') no-repeat center center fixed;background-size:cover;display:flex;justify-content:center;align-items:center;min-height:100vh}.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,13,21,0.9);z-index:-1}.card{background:var(--glass);backdrop-filter:blur(25px);padding:40px;border-radius:35px;border:1px solid rgba(255,183,197,0.3);width:90%;max-width:400px;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,0.5)}h1{font-family:'Orbitron',sans-serif;color:var(--accent);letter-spacing:3px;margin-bottom:30px}input{width:100%;padding:12px;margin:10px 0;border-radius:15px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.4);color:#fff;text-align:center;box-sizing:border-box}.btn{background:var(--accent);color:#111;border:none;padding:12px;border-radius:50px;cursor:pointer;font-weight:700;width:100%;margin-top:15px;transition:0.3s}.btn:hover{box-shadow:0 0 15px var(--accent)}a{color:var(--accent);text-decoration:none;font-size:12px}
+        body { font-family: 'Quicksand', sans-serif; background: #0d0d15; color: white; padding: 40px; text-align: center; }
+        .admin-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 20px; border: 1px solid #ffb7c5; max-width: 500px; margin: 20px auto; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
+        button { background: #ffb7c5; font-weight: bold; cursor: pointer; }
+        .user-row { display: flex; justify-content: space-between; background: rgba(255,255,255,0.1); padding: 10px; margin-top: 5px; border-radius: 8px; }
     </style>
 </head>
 <body>
-<div class="overlay"></div>
-<div class="card">
-    <h1>VORT3X</h1>
-    <p style="font-size:12px; opacity:0.7;">Identify yourself.</p>
-    <input type="email" id="email" placeholder="Email Address">
-    <input type="password" id="pass" placeholder="Secret Key">
-    <button class="btn" onclick="login()">Enter Vortex</button>
-    <p style="font-size:12px; margin-top:20px;">New Soul? <a href="signup.html">Create Access</a></p>
-</div>
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen" };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    <h1>Master Control 👑</h1>
 
-    async function login() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('pass').value;
-        try {
-            await auth.signInWithEmailAndPassword(e, p);
-            window.location.href = "index.html";
-        } catch (err) { alert(err.message); }
+    <div class="admin-card">
+        <h3>Upload Media</h3>
+        <input type="file" id="fileInput">
+        <button onclick="uploadMedia()" id="upBtn">Upload to Cloud ✨</button>
+    </div>
+
+    <div class="admin-card">
+        <h3>Pending Approvals</h3>
+        <div id="userList">Checking...</div>
+    </div>
+
+<script>
+const firebaseConfig = { apiKey: "AIzaSyBXRegELSEewlBwfofK4sr2Kr9ZmM1ipp0", projectId: "fiza-queen" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+auth.onAuthStateChanged(user => {
+    if(!user) { window.location.href = "index.html"; }
+    else {
+        db.collection("users").doc(user.uid).get().then(doc => {
+            if(doc.data().role !== 'admin') { alert("Not Admin!"); window.location.href = "index.html"; }
+            else { loadUsers(); }
+        });
     }
+});
+
+async function uploadMedia() {
+    const file = document.getElementById('fileInput').files[0];
+    if(!file) return alert("Select file!");
+    const btn = document.getElementById('upBtn');
+    btn.innerText = "Uploading...";
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", "VortEx");
+    const type = file.type.startsWith("video") ? "video" : "image";
+    const res = await fetch(`https://api.cloudinary.com/v1_1/dawtxacmr/${type}/upload`, { method: "POST", body: fd });
+    const data = await res.json();
+    await db.collection("gallery").add({ url: data.secure_url, type: type, time: firebase.firestore.FieldValue.serverTimestamp() });
+    btn.innerText = "Upload to Cloud ✨";
+    alert("Done!");
+}
+
+function loadUsers() {
+    db.collection("users").where("isApproved", "==", false).onSnapshot(snap => {
+        const list = document.getElementById('userList');
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            list.innerHTML += `<div class="user-row"><span>${doc.data().email}</span><button onclick="approve('${doc.id}')" style="width:auto; padding:5px 15px;">Approve</button></div>`;
+        });
+    });
+}
+function approve(id) { db.collection("users").doc(id).update({ isApproved: true }); }
 </script>
 </body>
 </html>
